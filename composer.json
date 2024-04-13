@@ -1,0 +1,19 @@
+{
+    "name": "jose/bienesraices-poo",
+    "description": "Creando un proyecto con POO",
+    "type": "project",
+    "authors": [
+        {
+            "name": "JOSE",
+            "email": "jzambranom30@uteq.edu.ec"
+        }
+    ],
+    "require": {
+        "intervention/image": "2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\" : "./clases"
+        }
+    }
+}
