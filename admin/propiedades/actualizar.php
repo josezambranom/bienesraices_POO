@@ -1,6 +1,7 @@
 <?php
 
 use App\Propiedad;
+use Intervention\Image\ImageManagerStatic as Image;
 
     require '../../includes/app.php';
     estaAutenticado();
@@ -21,106 +22,31 @@ use App\Propiedad;
     $resultado = mysqli_query($db, $consulta);
 
     // Arreglo con mensajes de errores
-    $errores = [];
-
-    $titulo = $propiedad->titulo;
-    $precio = $propiedad->precio;
-    $descripcion = $propiedad->descripcion;
-    $habitaciones = $propiedad->habitacion;
-    $wc = $propiedad->wc;
-    $estacionamiento = $propiedad->estacionamiento;
-    $vendedorID = $propiedad->vendedores_id;
-    $imagenPropiedad = $propiedad->imagen;
+    $errores = Propiedad::getErrores();
 
     // Ejecutar el código después de que el usuario envía el form
-    if($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+    if($_SERVER['REQUEST_METHOD'] === 'POST') {      
         // Asignar los atributos
         $args = $_POST['propiedad'];
         $propiedad->sincronizar($args);
 
-        // Asignar files a una variable
-        $imagen = $_FILES['img'];   
+        // Validación
+        $errores = $propiedad->validar();
 
-        if(!$titulo) {
-            $errores[] = "Debes añadir un título";
+        // Subida de archivos
+        // Generar nombre unico
+        $nombreImagen = md5(uniqid(rand(), true)) . ".jpg";
+
+        if($_FILES['propiedad']['tmp_name']['img']) {
+            $image = Image::make($_FILES['propiedad']['tmp_name']['img'])->fit(800, 600);
+            $propiedad->setImagen($nombreImagen);
         }
-
-        if(!$precio) {
-            $errores[] = "El precio es obligatorio";
-        }
-
-        if(strlen($descripcion) < 50) {
-            $errores[] = "La descripción es obligatoria y debe tener al menos 50 caracteres";
-        }
-
-        if(!$habitaciones) {
-            $errores[] = "El número de habitaciones es obligatorio";
-        }
-
-        if(!$wc) {
-            $errores[] = "El número de baños es obligatorio";
-        }
-
-        if(!$estacionamiento) {
-            $errores[] = "El número de estacionamientos es obligatorio";
-        }
-
-        if(!$vendedorID) {
-            $errores[] = "Elije un vendedor";
-        }
-
-        // Validar por tamaño (1Mb máximo)
-        $medida = 1000 * 1000;
-        if($imagen['size'] > $medida) {
-            $errores[] = "La imagen es muy pesada";
-        }
-
-        // echo "<pre>";
-        // var_dump($errores);
-        // echo "</pre>";
-
+        
         // Revisar que el array de errores este vacio
         if(empty($errores)) {
-
-            // Crear carpeta
-            $carpetaImagenes = '../../imagenes/';
-
-            if(!is_dir($carpetaImagenes)) {
-                mkdir($carpetaImagenes);
-            }
-
-            $nombreImagen = "";
-
-            // Subida de archivos
-
-            if($imagen['name']) {
-                // Eliminar imagen previa
-
-                unlink($carpetaImagenes . $propiedad['imagen']);
-
-                // Generar nombre unico
-                $nombreImagen = md5(uniqid(rand(), true)) . ".jpg";
-
-                // Subir la imagen
-                move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen);
-            } else {
-                $nombreImagen = $propiedad['imagen'];
-            }
-
-            // Insertar en DB
-            $query = "UPDATE propiedades SET titulo = '${titulo}', precio = ${precio}, imagen = '$nombreImagen', 
-                descripcion = '${descripcion}',
-                habitacion = ${habitaciones}, wc = ${wc}, estacionamiento = ${estacionamiento},
-                vendedores_id = ${vendedorID} WHERE id = ${id} ";
-            
-            // echo $query;
-
-            $result = mysqli_query($db, $query);
-            if($result) {
-                // Redireccionar al usuario
-                header('Location: /admin?result=2'); // Funciona cuando no hay html antes, solo cuando sea necesario lo mas poco
-            }
+            // Guarda la imagen en el server
+            $image->save(CARPETA_IMAGENES . $nombreImagen);
+            $propiedad->guardar();        
         }
         
     }

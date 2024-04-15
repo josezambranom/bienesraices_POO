@@ -46,12 +46,7 @@
             $image->save(CARPETA_IMAGENES . $nombreImagen);
 
             // Guarda en la BD
-            $result = $propiedad->guardar();
-
-            if($result) {
-                // Redireccionar al usuario
-                header('Location: /admin?result=1'); // Funciona cuando no hay html antes, solo cuando sea necesario lo mas poco
-            }
+            $propiedad->guardar();
         }
         
     }

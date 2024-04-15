@@ -24,7 +24,7 @@ class Propiedad {
 
     public function __construct($args = [])
     {
-        $this->id = $args['id'] ?? '';
+        $this->id = $args['id'] ?? null;
         $this->titulo = $args['titulo'] ?? '';
         $this->precio = $args['precio'] ?? '';
         $this->imagen = $args['imagen'] ?? '';
@@ -42,7 +42,16 @@ class Propiedad {
     }
 
     public function guardar() {
+        if (!is_null($this->id)) {
+            // Actualizando un registro
+            $this->actualizar();
+        } else {
+            // Creando un registro
+            $this->crear();
+        }
+    }
 
+    public function crear() {
         // Sanitizar datos
         $atributos = $this->sanitizarDatos();
 
@@ -55,7 +64,45 @@ class Propiedad {
 
         $result = self::$db->query($query);
         
-        return $result;
+        if($result) {
+            // Redireccionar al usuario
+            header('Location: /admin?result=1'); // Funciona cuando no hay html antes, solo cuando sea necesario lo mas poco
+        }
+    }
+
+    public function actualizar() {
+        // Sanitizar datos
+        $atributos = $this->sanitizarDatos();
+
+        $valores = [];
+        foreach ($atributos as $key => $value) {
+            $valores[] = "{$key}='{$value}'";
+        }
+
+        $query = "UPDATE propiedades SET ";
+        $query .= join(', ', $valores);
+        $query .= " WHERE id = '" . self::$db->escape_string($this->id) . "' ";
+        $query .= " LIMIT 1 ";
+
+        $resultado = self::$db->query($query);
+
+        if($resultado) {
+            // Redireccionar al usuario
+            header('Location: /admin?result=2');
+        }
+    }
+
+    public function eliminar() {
+        // Eliminar la propiedad
+        $query = "DELETE FROM propiedades WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1";
+        $resultado = self::$db->query($query);
+
+        if($resultado) {
+            // Elminar archivo
+            $this->eliminarImagen();
+            header('location: /admin?result=3');
+        }
+
     }
 
     // Identificar y unir los atributos de la DB
@@ -68,6 +115,7 @@ class Propiedad {
         return $atributos;
     }
 
+    // Sanitizar datos para evitar el insert de codigo malicioso
     public function sanitizarDatos() {
         $atributos = $this->atributos();
         $sanitizado = [];
@@ -79,9 +127,23 @@ class Propiedad {
 
     // Subida de archivos
     public function setImagen($imagen) {
+        // Eliminar la imagen previa
+        if(!is_null($this->id)) {
+            $this->eliminarImagen();
+        }
+
         // Asignar al atributo de imagen el nombre de la imagen
         if($imagen) {
             $this->imagen = $imagen;
+        }
+    }
+
+    // Eliminar archivos
+    public function eliminarImagen() {
+        // Comprobar si existe el archivo
+        $existeArchivo = file_exists(CARPETA_IMAGENES . $this->imagen);
+        if($existeArchivo) {
+            unlink(CARPETA_IMAGENES . $this->imagen);
         }
     }
 
