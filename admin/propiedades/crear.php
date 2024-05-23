@@ -2,20 +2,18 @@
 
     require '../../includes/app.php';
     use App\Propiedad;
+    use App\Vendedor;
     use Intervention\Image\ImageManagerStatic as Image;
 
     estaAutenticado();
 
-    $db = conectarDB();
+    $propiedad = new Propiedad();
 
-    // COnsulta de vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query($db, $consulta);
+    // Consulta para obtener todos los vendedores
+    $vendedores = Vendedor::all();
 
     // Arreglo con mensajes de errores
     $errores = Propiedad::getErrores();
-
-    $propiedad = new Propiedad();
 
     // Ejecutar el código después de que el usuario envía el form
     if($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -55,7 +53,7 @@
 ?>
 
     <main class="contenedor seccion">
-        <h1>Crear</h1>
+        <h1>Crear Propiedad</h1>
 
         <a class="boton boton-verde" href="/admin">Volver</a>
 
@@ -67,7 +65,7 @@
 
         <form class="formulario" method="POST" action="/admin/propiedades/crear.php" enctype="multipart/form-data">
             <?php include '../../includes/templates/formulario_propiedades.php'; ?>
-            <input class="boton boton-amarillo" type="submit" value="Crear propiedad">
+            <input class="boton boton-amarillo" type="submit" value="Crear Propiedad">
         </form>
 
     </main>

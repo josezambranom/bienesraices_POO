@@ -55,7 +55,7 @@ use Intervention\Image\ImageManagerStatic as Image;
 ?>
 
     <main class="contenedor seccion">
-        <h1>Actualizar</h1>
+        <h1>Actualizar Propiedad</h1>
 
         <a class="boton boton-verde" href="/admin">Volver</a>
 
@@ -67,7 +67,7 @@ use Intervention\Image\ImageManagerStatic as Image;
 
         <form class="formulario" method="POST" enctype="multipart/form-data">
             <?php include '../../includes/templates/formulario_propiedades.php'; ?>
-            <input class="boton boton-amarillo" type="submit" value="Actualizar propiedad">
+            <input class="boton boton-amarillo" type="submit" value="Actualizar Propiedad">
         </form>
 
     </main>
