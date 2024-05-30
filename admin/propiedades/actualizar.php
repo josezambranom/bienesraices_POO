@@ -30,6 +30,7 @@ use Intervention\Image\ImageManagerStatic as Image;
         $args = $_POST['propiedad'];
         $propiedad->sincronizar($args);
 
+        debugear($propiedad);
         // Validación
         $errores = $propiedad->validar();
 
@@ -45,7 +46,9 @@ use Intervention\Image\ImageManagerStatic as Image;
         // Revisar que el array de errores este vacio
         if(empty($errores)) {
             // Guarda la imagen en el server
-            $image->save(CARPETA_IMAGENES . $nombreImagen);
+            if($_FILES['propiedad']['tmp_name']['imagen']) {
+                $image->save(CARPETA_IMAGENES . $nombreImagen);
+            }
             $propiedad->guardar();        
         }
         
